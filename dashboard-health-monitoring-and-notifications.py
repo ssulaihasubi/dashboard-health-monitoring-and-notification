@@ -3,21 +3,16 @@
 # Last Update: -
 # Python Developer: Sulaiha Subi
 # Goals: Monitors dashboard health, detects errors, and sends automated alerts promptly
-
+# Downloadable data through this link: https://app.selangkah.my/manage2/data_science/portal-dashboard-health-monitor/portal-dashboard-health-monitoring.csv
 
 ##################################################################### Process Start Here ###########################################################################
 
 # import libraries
 import requests
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
-############################   Python Class Definition   ############################
-
-import requests
 import csv
 from datetime import datetime
+
+############################   Python Class Definition   ############################
 
 class DashboardMonitor:
     def __init__(self, urls, error_codes, output_file):
@@ -33,30 +28,29 @@ class DashboardMonitor:
 
     def check_dashboard_status(self):
         """
-        Check the status of each dashboard URL and save the results to a CSV file.
+        Check the status of each dashboard URL, print the results, and save them to a CSV file.
         """
-        print("Checking dashboard status...")
         results = []
 
         for url in self.urls:
-            print(f"Checking URL: {url}")
             try:
                 response = requests.get(url)
                 status = "OK" if response.status_code == 200 else self.error_codes.get(response.status_code, f"Error {response.status_code}")
-                print(f"Status code for {url}: {response.status_code} - Status: {status}")
             except requests.exceptions.RequestException as e:
                 status = f"Error: {str(e)}"
-                print(f"Error while checking {url}: {str(e)}")
             
             # Append the result for each URL
-            results.append({
+            result = {
                 'URL': url,
                 'Status': status,
                 'Timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            })
+            }
+            results.append(result)
+
+            # Print the result
+            print(f"URL: {result['URL']}, Status: {result['Status']}, Timestamp: {result['Timestamp']}")
 
         self.save_results_to_csv(results)
-        print("Status check and saving results completed.")
 
     def save_results_to_csv(self, results):
         """
@@ -87,12 +81,12 @@ error_codes_to_monitor = {
     502: "502 Bad Gateway",
     500: "500 Internal Server Error",
     404: "404 Not Found",
-    403: "403 Forbidden",
-    401: "401 Unauthorized",
-    400: "400 Bad Request"
+    403: "Forbidden",
+    401: "Unauthorized",
+    400: "Bad Request"
 }
 
-output_csv_file = "dashboard_status.csv"  # Path to the CSV file where results will be saved
+output_csv_file = "/var/www/app-selangkah-my/public_html/manage2/data_science/portal-dashboard-health-monitor/portal-dashboard-health-monitoring.csv"  # Path to the CSV file where results will be saved
 
 # Instantiate the monitor and run the check
 monitor = DashboardMonitor(urls_to_monitor, error_codes_to_monitor, output_csv_file)
